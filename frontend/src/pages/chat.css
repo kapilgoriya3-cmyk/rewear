@@ -1,0 +1,1018 @@
+/* ============================================================================
+   ReWear — Chat / Negotiation Page Styles (src/pages/chat.css)
+   Clean sustainable-fashion aesthetic matching ReWear design tokens
+   ============================================================================ */
+
+.negotiationPage {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px 5vw 60px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Top Navigation & Page Context Bar --- */
+.negTopBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.negBackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 8px 16px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.negBackBtn:hover {
+  color: var(--ink);
+  border-color: #c8ccc9;
+  background: #fbfaf7;
+  transform: translateX(-2px);
+}
+
+.negMetaInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.negRefPill {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 6px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+.demoSwitcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 3px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.demoLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  padding: 0 8px 0 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.demoBtn {
+  border: none;
+  background: transparent;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.demoBtn.active {
+  background: var(--ink);
+  color: #fff;
+}
+
+.demoBtn.active.pending {
+  background: #b25e1a;
+  color: #fff;
+}
+
+.demoBtn.active.accepted {
+  background: var(--sage);
+  color: #fff;
+}
+
+.demoBtn.active.rejected {
+  background: #6c756f;
+  color: #fff;
+}
+
+/* --- Main Layout Grid --- */
+.negContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* --- Compact Swap Summary Section --- */
+.swapSummaryCard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(24, 31, 26, 0.04);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.swapSummaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #fbfaf7;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swapSummaryTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.swapEyebrow {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 900;
+  color: var(--sage);
+  text-transform: uppercase;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.statusBadge.pending {
+  background: #fff7ed;
+  color: #c25e19;
+  border: 1px solid #fed7aa;
+}
+
+.statusBadge.accepted {
+  background: var(--sage2);
+  color: var(--sage);
+  border: 1px solid #b7dcbe;
+}
+
+.statusBadge.completed {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.statusBadge.rejected {
+  background: #fdf2f2;
+  color: #9b1c1c;
+  border: 1px solid #fecaca;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Swap Items Comparison Grid */
+.swapItemsGrid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 18px 24px;
+  gap: 18px;
+}
+
+.swapItemBox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #faf9f6;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.swapItemBox:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.swapItemBox.mySide {
+  background: #f7faf8;
+  border-color: #d6e5db;
+}
+
+.swapItemImg {
+  width: 82px;
+  height: 82px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.swapItemDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.swapItemParty {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 3px;
+  color: var(--muted);
+}
+
+.swapItemParty.mine {
+  color: var(--sage);
+}
+
+.swapItemTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.swapItemAttributes {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.swapItemAttrDot {
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+.swapItemValue {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--sage);
+  margin-top: 4px;
+}
+
+/* Center Swap Indicator */
+.swapConnector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.swapIconCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(22, 26, 24, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.swapIconCircle:hover {
+  transform: rotate(180deg);
+}
+
+.swapConnectorLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+
+/* Swap Action / Status Footer */
+.swapSummaryFooter {
+  padding: 14px 24px;
+  background: #fbfaf7;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.swapStatusNotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.swapStatusNoticeIcon {
+  font-size: 16px;
+}
+
+.swapActionButtons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnReject {
+  background: #fff;
+  border: 1px solid #f8b4b4;
+  color: #9b1c1c;
+  padding: 10px 18px;
+  font-size: 13px;
+  border-radius: 12px;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+
+.btnReject:hover {
+  background: #fdf2f2;
+  border-color: #e02424;
+}
+
+.btnAccept {
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  font-size: 13px;
+  border-radius: 12px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(45, 107, 75, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btnAccept:hover {
+  background: #24583d;
+  transform: translateY(-1px);
+}
+
+.swapPostStatusBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.swapPostStatusBanner.accepted {
+  color: var(--sage);
+}
+
+.swapPostStatusBanner.rejected {
+  color: #854d0e;
+}
+
+.swapChecklistBtn {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.swapChecklistBtn:hover {
+  background: #f1eadf;
+}
+
+/* --- Main Chat Shell Card --- */
+.chatCard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 10px 40px rgba(24, 31, 26, 0.05);
+  display: flex;
+  flex-direction: column;
+  min-height: 580px;
+  overflow: hidden;
+}
+
+/* --- Chat Header --- */
+.chatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.chatUserMeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.chatAvatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.onlineIndicatorDot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.chatUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chatUserNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatUserName {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.verifiedBadge {
+  background: var(--sage2);
+  color: var(--sage);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chatUserSub {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusIndicatorText {
+  color: #059669;
+  font-weight: 700;
+}
+
+.chatHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatHeaderBtn {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.chatHeaderBtn:hover {
+  background: #f1eadf;
+  border-color: #d8d3c5;
+}
+
+/* Safety Guidance Notice */
+.safetyNoticeBar {
+  background: #fcf9f2;
+  border-bottom: 1px solid #ebdcc5;
+  padding: 9px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #7c4a03;
+}
+
+.safetyNoticeText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Messages Conversation Area --- */
+.messagesArea {
+  flex: 1;
+  background: #faf9f6;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 380px;
+  max-height: 520px;
+  scroll-behavior: smooth;
+}
+
+/* Custom modern scrollbar */
+.messagesArea::-webkit-scrollbar {
+  width: 6px;
+}
+.messagesArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.messagesArea::-webkit-scrollbar-thumb {
+  background: #d8dad5;
+  border-radius: 10px;
+}
+.messagesArea::-webkit-scrollbar-thumb:hover {
+  background: #b5b9b1;
+}
+
+/* Date Separator */
+.dateDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+  position: relative;
+}
+
+.dateDivider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.dateDividerText {
+  position: relative;
+  background: #faf9f6;
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* System Event Card in Stream */
+.systemEventCard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin: 6px auto;
+  max-width: 580px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.systemEventIcon {
+  font-size: 18px;
+  color: var(--sage);
+}
+
+.systemEventCard b {
+  color: var(--ink);
+}
+
+/* Message Rows */
+.msgRow {
+  display: flex;
+  gap: 10px;
+  max-width: 78%;
+  align-items: flex-end;
+}
+
+.msgRow.incoming {
+  align-self: flex-start;
+}
+
+.msgRow.outgoing {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.msgAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.msgBubbleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msgRow.incoming .msgBubbleContainer {
+  align-items: flex-start;
+}
+
+.msgRow.outgoing .msgBubbleContainer {
+  align-items: flex-end;
+}
+
+.msgSenderName {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+/* Message Bubbles */
+.msgBubble {
+  padding: 13px 17px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  border-radius: 18px;
+  word-break: break-word;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+/* Incoming bubble: clean white card with subtle warm border */
+.msgBubble.incoming {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 4px;
+}
+
+/* Outgoing bubble: signature ReWear ink */
+.msgBubble.outgoing {
+  background: var(--ink);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+/* Message Attachment Preview */
+.msgAttachmentCard {
+  margin-top: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1eadf;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.msgAttachmentImg {
+  width: 100%;
+  max-width: 260px;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.msgAttachmentImg:hover {
+  transform: scale(1.02);
+}
+
+.msgAttachmentCaption {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Message Metadata (Timestamp + Read status) */
+.msgMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #929994;
+  padding: 0 4px;
+}
+
+.readReceipt {
+  color: var(--sage);
+  font-size: 12px;
+}
+
+/* --- Quick Negotiation Suggestion Pills --- */
+.quickNegotiationBar {
+  padding: 10px 20px;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.quickNegotiationBar::-webkit-scrollbar {
+  height: 3px;
+}
+
+.quickNegotiationLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.quickNegotiationChip {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.quickNegotiationChip:hover {
+  background: var(--sage2);
+  border-color: #b7dcbe;
+  color: var(--sage);
+}
+
+/* --- Bottom Message Composer --- */
+.composerForm {
+  padding: 14px 20px;
+  background: #ffffff;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.composerActionBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fbfaf7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.composerActionBtn:hover {
+  background: #fff;
+  color: var(--ink);
+  border-color: #c4c8c2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.composerInputWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.composerInput {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 13.5px;
+  background: #fbfaf7;
+  color: var(--ink);
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.composerInput:focus {
+  background: #fff;
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(45, 107, 75, 0.1);
+}
+
+.composerInput::placeholder {
+  color: #929994;
+}
+
+.composerSendBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 20px;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(45, 107, 75, 0.2);
+}
+
+.composerSendBtn:hover:not(:disabled) {
+  background: #24583d;
+  transform: translateY(-1px);
+}
+
+.composerSendBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Sustainable ReWear Footer Reassurance */
+.chatFooterReassurance {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ecoLeafIcon {
+  color: var(--sage);
+}
+
+/* --- Responsive Media Queries --- */
+@media (max-width: 900px) {
+  .negotiationPage {
+    padding: 16px 16px 50px;
+  }
+
+  .swapItemsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .swapConnector {
+    flex-direction: row;
+    padding: 4px 0;
+  }
+
+  .swapIconCircle {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .msgRow {
+    max-width: 90%;
+  }
+
+  .chatHeaderActions {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .negTopBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .negMetaInfo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .swapItemBox {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .swapItemImg {
+    width: 65px;
+    height: 65px;
+  }
+
+  .swapItemTitle {
+    font-size: 14px;
+  }
+
+  .swapSummaryFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .swapActionButtons {
+    width: 100%;
+  }
+
+  .btnReject,
+  .btnAccept {
+    flex: 1;
+    text-align: center;
+  }
+
+  .chatHeader {
+    padding: 12px 16px;
+  }
+
+  .messagesArea {
+    padding: 16px;
+    min-height: 320px;
+  }
+
+  .composerForm {
+    padding: 10px 14px;
+  }
+
+  .composerSendBtn {
+    padding: 10px 14px;
+  }
+}
