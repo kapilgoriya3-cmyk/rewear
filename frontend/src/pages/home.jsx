@@ -1,7 +1,7 @@
 // ============================================================================
 // ReWear — Home Page (src/pages/home.jsx)
 // ============================================================================
-
+import API_BASE_URL from "../api";
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ClothingCard from '../components/ClothingCard';
@@ -10,7 +10,7 @@ import denimJacket from '../assets/denimJacket.jpg';
 import greenHoodie from '../assets/greenHoodie.jpg';
 import leatherBackpack from '../assets/leatherBackpack.jpg';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 function Home() {
   const [featuredItems, setFeaturedItems] = useState([]);

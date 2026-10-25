@@ -2,7 +2,7 @@
 // ReWear — Add Item / Create Listing Page (src/pages/additem.jsx)
 // Multi-photo selection, Cloudinary upload, and estimated swap value calculation
 // ============================================================================
-
+import API_BASE_URL from "../api";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -161,7 +161,7 @@ function AddItem() {
         imageFormData.append("image", file);
 
         const uploadResponse = await fetch(
-          "http://localhost:5000/api/items/upload-image",
+          `${API_BASE_URL}/items/upload-image`,
           {
             method: "POST",
             headers: {
@@ -184,7 +184,7 @@ function AddItem() {
 
       // Create listing containing every uploaded image URL
       const response = await fetch(
-        "http://localhost:5000/api/items",
+      `${API_BASE_URL}/items`,
         {
           method: "POST",
           headers: {

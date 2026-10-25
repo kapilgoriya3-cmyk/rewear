@@ -2,12 +2,12 @@
 // ReWear — Community Hub Page (src/pages/community.jsx)
 // Community members, local swap hubs, guidelines, and circular impact
 // ============================================================================
-
+import API_BASE_URL from "../api";  
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ClothingCard from "../components/ClothingCard";
 
-const API = "http://localhost:5000/api";
+const API = API_BASE_URL;
 
 function Community() {
   const [recentCommunityItems, setRecentCommunityItems] = useState([]);

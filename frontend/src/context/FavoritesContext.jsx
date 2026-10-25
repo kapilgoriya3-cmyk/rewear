@@ -1,9 +1,12 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useAuth } from "./AuthContext";
-
+import API_BASE_URL from "../api";
 const FavoritesContext = createContext();
 
-const API = "http://localhost:5000/api";
+
+
+const API = API_BASE_URL;
+
 const LOCAL_STORAGE_KEY = "rewear_favorites";
 
 export function FavoritesProvider({ children }) {

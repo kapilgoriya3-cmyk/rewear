@@ -1,6 +1,8 @@
 // ============================================================================
 // ReWear — Dedicated Saved Pieces / Wishlist Page (src/pages/saved.jsx)
 // ============================================================================
+
+import API_BASE_URL from "../api";
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +13,7 @@ import greenHoodieImg from '../assets/greenHoodie.jpg';
 import leatherBackpackImg from '../assets/leatherBackpack.jpg';
 import blackTopImg from '../assets/blackTop.jpg';
 
-const API = 'http://localhost:5000/api';
+const API = API_BASE_URL;
 
 function getImageForCategory(category, title) {
   const cat = (category || '').toLowerCase();

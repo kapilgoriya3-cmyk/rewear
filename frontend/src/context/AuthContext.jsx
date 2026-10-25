@@ -1,14 +1,16 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
+import API_BASE_URL from "../api";
 
 const AuthContext = createContext(null);
 
-const API_BASE_URL = 'http://localhost:5000/api/auth';
+const AUTH_API = `${API_BASE_URL}/auth`;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem('rewear_user');
-      if (!savedUser || savedUser === 'undefined' || savedUser === 'null') return null;
+      const savedUser = localStorage.getItem("rewear_user");
+      if (!savedUser || savedUser === "undefined" || savedUser === "null")
+        return null;
       return JSON.parse(savedUser);
     } catch {
       return null;
@@ -16,8 +18,10 @@ export function AuthProvider({ children }) {
   });
 
   const [token, setToken] = useState(() => {
-    const savedToken = localStorage.getItem('rewear_token');
-    return savedToken && savedToken !== 'undefined' && savedToken !== 'null' ? savedToken : null;
+    const savedToken = localStorage.getItem("rewear_token");
+    return savedToken && savedToken !== "undefined" && savedToken !== "null"
+      ? savedToken
+      : null;
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -25,17 +29,17 @@ export function AuthProvider({ children }) {
   // Sync state to localStorage cleanly
   useEffect(() => {
     if (user) {
-      localStorage.setItem('rewear_user', JSON.stringify(user));
+      localStorage.setItem("rewear_user", JSON.stringify(user));
     } else {
-      localStorage.removeItem('rewear_user');
+      localStorage.removeItem("rewear_user");
     }
   }, [user]);
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('rewear_token', token);
+      localStorage.setItem("rewear_token", token);
     } else {
-      localStorage.removeItem('rewear_token');
+      localStorage.removeItem("rewear_token");
     }
   }, [token]);
 
@@ -46,7 +50,7 @@ export function AuthProvider({ children }) {
     let isMounted = true;
     const syncSession = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/me`, {
+        const response = await fetch(`${AUTH_API}/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -63,7 +67,7 @@ export function AuthProvider({ children }) {
           logout();
         }
       } catch (err) {
-        console.error('Session sync error:', err);
+        console.error("Session sync error:", err);
       }
     };
 
@@ -77,7 +81,7 @@ export function AuthProvider({ children }) {
   const refreshUser = async () => {
     if (!token) return null;
     try {
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const response = await fetch(`${AUTH_API}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -92,18 +96,18 @@ export function AuthProvider({ children }) {
         logout();
       }
     } catch (err) {
-      console.error('refreshUser error:', err);
+      console.error("refreshUser error:", err);
     }
     return null;
   };
 
-  const login = async (email, password) =>   {
+  const login = async (email, password) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
+      const response = await fetch(`${AUTH_API}/login`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -113,7 +117,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || 'Login failed. Please try again.',
+          error: data.message || "Login failed. Please try again.",
           userNotFound: !!data.userNotFound,
           email: data.email || email,
         };
@@ -128,10 +132,11 @@ export function AuthProvider({ children }) {
         message: data.message,
       };
     } catch (err) {
-      console.error('Login network error:', err);
+      console.error("Login network error:", err);
       return {
         success: false,
-        error: 'Unable to reach backend server. Please verify the server is running on port 5000.',
+        error:
+          "Unable to reach backend server. Please verify the server is running on port 5000.",
         networkError: true,
       };
     } finally {
@@ -139,15 +144,27 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async ({ name, email, password, confirmPassword, location }) => {
+  const register = async ({
+    name,
+    email,
+    password,
+    confirmPassword,
+    location,
+  }) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
-        method: 'POST',
+      const response = await fetch(`${AUTH_API}/register`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password, confirmPassword, location }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          confirmPassword,
+          location,
+        }),
       });
 
       const data = await response.json();
@@ -155,7 +172,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || 'Registration failed. Please try again.',
+          error: data.message || "Registration failed. Please try again.",
           userExists: !!data.userExists,
         };
       }
@@ -172,10 +189,11 @@ export function AuthProvider({ children }) {
         message: data.message,
       };
     } catch (err) {
-      console.error('Registration network error:', err);
+      console.error("Registration network error:", err);
       return {
         success: false,
-        error: 'Unable to reach backend server. Please verify the server is running on port 5000.',
+        error:
+          "Unable to reach backend server. Please verify the server is running on port 5000.",
         networkError: true,
       };
     } finally {
@@ -184,33 +202,36 @@ export function AuthProvider({ children }) {
   };
 
   const updateProfile = async ({ name, location }) => {
-    if (!token) return { success: false, error: 'Not authenticated' };
+    if (!token) return { success: false, error: "Not authenticated" };
     try {
-      const response = await fetch(`${API_BASE_URL}/me`, {
-        method: 'PATCH',
+      const response = await fetch(`${AUTH_API}/me`, {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ name, location }),
       });
       const data = await response.json();
       if (!response.ok) {
-        return { success: false, error: data.message || 'Failed to update profile' };
+        return {
+          success: false,
+          error: data.message || "Failed to update profile",
+        };
       }
       setUser(data.user);
       return { success: true, user: data.user, message: data.message };
     } catch (err) {
-      console.error('Update profile error:', err);
-      return { success: false, error: 'Network error updating profile' };
+      console.error("Update profile error:", err);
+      return { success: false, error: "Network error updating profile" };
     }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('rewear_user');
-    localStorage.removeItem('rewear_token');
+    localStorage.removeItem("rewear_user");
+    localStorage.removeItem("rewear_token");
   };
 
   return (
@@ -237,10 +258,8 @@ export function useAuth() {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
 
   return context;
 }
-
- 

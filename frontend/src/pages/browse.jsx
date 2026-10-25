@@ -2,14 +2,13 @@
 // ReWear — Explore / Browse Page (src/pages/browse.jsx)
 // Search, Category, Condition, and Location filters connected to backend
 // ============================================================================
-
+import API_BASE_URL from "../api";
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ClothingCard from '../components/ClothingCard';
 
-const API = 'http://localhost:5000/api';
-
+const API = API_BASE_URL;
 function Browse() {
   const { user } = useAuth();
 

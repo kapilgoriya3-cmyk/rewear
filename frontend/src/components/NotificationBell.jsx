@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API = "http://localhost:5000/api";
+import API_BASE_URL from "../api";
+
+const API = API_BASE_URL;
 
 export default function NotificationBell() {
   const { token, user } = useAuth();

@@ -2,7 +2,7 @@
 // ReWear — Profile & Dashboard Page (src/pages/profile.jsx)
 // My Listings (with image cards), Edit Profile, Swap Management, Accurate Stats
 // ============================================================================
-
+import API_BASE_URL from "../api";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import greenHoodieImg from "../assets/greenHoodie.jpg";
 import leatherBackpackImg from "../assets/leatherBackpack.jpg";
 import blackTopImg from "../assets/blackTop.jpg";
 
-const API = "http://localhost:5000/api";
+const API = API_BASE_URL;
 
 function getImageForCategory(category, title) {
   const cat = (category || "").toLowerCase();

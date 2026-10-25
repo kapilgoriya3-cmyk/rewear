@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./chat.css";
+import API_BASE_URL from "../api";
 
 // ReWear Authentic Item Assets
 import denimJacketImg from "../assets/denimJacket.jpg";
@@ -44,7 +45,7 @@ export default function Chat() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`http://localhost:5000/api/swaps/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/swaps/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -65,7 +66,7 @@ export default function Chat() {
 
         // Fetch real messages for this swap
         const messagesResponse = await fetch(
-          `http://localhost:5000/api/messages/${id}`,
+          `${API_BASE_URL}/messages/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -152,7 +153,7 @@ const handleSendMessage = async (e) => {
   }
 
   try {
-    const response = await fetch("http://localhost:5000/api/messages", {
+    const response = await fetch(`${API_BASE_URL}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -211,7 +212,7 @@ const handleSendMessage = async (e) => {
 const handleAcceptSwap = async () => {
   try {
     const response = await fetch(
-      `http://localhost:5000/api/swaps/${id}`,
+      `${API_BASE_URL}/swaps/${id}`,
       {
         method: "PATCH",
         headers: {
@@ -254,7 +255,7 @@ const handleAcceptSwap = async () => {
 const handleRejectSwap = async () => {
   try {
     const response = await fetch(
-      `http://localhost:5000/api/swaps/${id}`,
+      `${API_BASE_URL}/swaps/${id}`,
       {
         method: "PATCH",
         headers: {
@@ -302,7 +303,7 @@ const handleRejectSwap = async () => {
     if (confirming) return;
     setConfirming(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/swaps/${id}/confirm`, {
+      const response = await fetch(`${API_BASE_URL}/swaps/${id}/confirm`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

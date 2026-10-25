@@ -8,6 +8,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
+import API_BASE_URL from "../api";
 import denimJacketImg from "../assets/denimJacket.jpg";
 import floralDressImg from "../assets/floralDress.jpg";
 import greenHoodieImg from "../assets/greenHoodie.jpg";
@@ -74,7 +75,7 @@ function ItemDetail() {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/items/${id}`);
+        const response = await fetch(`${API_BASE_URL}/items/${id}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -175,7 +176,7 @@ function ItemDetail() {
 
     setLoadingMyItems(true);
     try {
-      const response = await fetch("http://localhost:5000/api/items/mine", {
+      const response = await fetch(`${API_BASE_URL}/items/mine`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -222,7 +223,7 @@ function ItemDetail() {
 
     setSwapLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/swaps", {
+      const response = await fetch(`${API_BASE_URL}/swaps`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
