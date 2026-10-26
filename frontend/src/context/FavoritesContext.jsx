@@ -1,42 +1,79 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useAuth } from "./AuthContext";
 import API_BASE_URL from "../api";
 const FavoritesContext = createContext();
 
-
-
 const API = API_BASE_URL;
 
-const LOCAL_STORAGE_KEY = "rewear_favorites";
+const STORAGE_PREFIX = "rewear_favorites_";
+
+function getStoredUserFavorites() {
+  try {
+    const savedToken = localStorage.getItem("rewear_token");
+    const savedUserStr = localStorage.getItem("rewear_user");
+    if (!savedToken || !savedUserStr) return [];
+    const parsedUser = JSON.parse(savedUserStr);
+    const uid = parsedUser?.id || parsedUser?._id;
+    if (!uid) return [];
+    const stored = localStorage.getItem(`${STORAGE_PREFIX}${uid}`);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
 
 export function FavoritesProvider({ children }) {
   const { user, token } = useAuth();
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const userId = user?.id || user?._id;
+
+  const [favorites, setFavorites] = useState(() => getStoredUserFavorites());
 
   const [inFlight, setInFlight] = useState({});
   const initialFetchDone = useRef(false);
 
-  // Sync favorites to localStorage whenever it changes
+  // Sync favorites to user-scoped localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(favorites));
+      if (token && userId) {
+        localStorage.setItem(
+          `${STORAGE_PREFIX}${userId}`,
+          JSON.stringify(favorites),
+        );
+      }
+      // Remove legacy unscoped key if present
+      localStorage.removeItem("rewear_favorites");
     } catch (e) {
       console.error("Failed to save favorites to localStorage:", e);
     }
-  }, [favorites]);
+  }, [favorites, token, userId]);
 
-  // When token/user changes, fetch favorites from backend
+  // When token or user changes, immediately update favorites
   useEffect(() => {
-    if (!token) {
+    if (!token || !userId) {
+      // Logged out: immediately clear in-memory favorites
+      setFavorites([]);
       initialFetchDone.current = false;
       return;
+    }
+
+    // Authenticated: load user-specific cached favorites first for immediate UI
+    try {
+      const stored = localStorage.getItem(`${STORAGE_PREFIX}${userId}`);
+      if (stored) {
+        setFavorites(JSON.parse(stored));
+      } else {
+        setFavorites([]);
+      }
+    } catch {
+      setFavorites([]);
     }
 
     let isMounted = true;
@@ -48,13 +85,15 @@ export function FavoritesProvider({ children }) {
         if (!res.ok) return;
         const data = await res.json();
         if (isMounted && Array.isArray(data.favorites)) {
-          // Merge server favorites with local favorites without creating unneeded reference updates
+          const serverFavs = data.favorites.map(String);
           setFavorites((prev) => {
-            const merged = Array.from(new Set([...prev, ...data.favorites]));
-            if (merged.length === prev.length && merged.every((id, idx) => id === prev[idx])) {
-              return prev; // Preserves reference to prevent unnecessary effect triggers
+            if (
+              prev.length === serverFavs.length &&
+              prev.every((id, idx) => id === serverFavs[idx])
+            ) {
+              return prev;
             }
-            return merged;
+            return serverFavs;
           });
         }
       } catch (err) {
@@ -69,7 +108,11 @@ export function FavoritesProvider({ children }) {
     return () => {
       isMounted = false;
     };
-  }, [token]);
+  }, [token, userId]);
+
+  const clearFavorites = useCallback(() => {
+    setFavorites([]);
+  }, []);
 
   const isFavorited = useCallback(
     (itemId) => {
@@ -77,7 +120,7 @@ export function FavoritesProvider({ children }) {
       const strId = itemId.toString();
       return favorites.includes(strId);
     },
-    [favorites]
+    [favorites],
   );
 
   const isProcessing = useCallback(
@@ -85,13 +128,24 @@ export function FavoritesProvider({ children }) {
       if (!itemId) return false;
       return Boolean(inFlight[itemId.toString()]);
     },
-    [inFlight]
+    [inFlight],
   );
 
   const toggleFavorite = useCallback(
     async (itemId) => {
       if (!itemId) return;
       const strId = itemId.toString();
+
+      if (!token) {
+        if (
+          window.confirm(
+            "Please log in to save pieces to your wishlist.\n\nWould you like to go to the login page?",
+          )
+        ) {
+          window.location.href = "/login";
+        }
+        return;
+      }
 
       // Prevent duplicate concurrent requests
       if (inFlight[strId]) return;
@@ -111,45 +165,43 @@ export function FavoritesProvider({ children }) {
         }
       });
 
-      // If user is authenticated, persist to backend
-      if (token) {
-        try {
-          const res = await fetch(`${API}/auth/favorites/${strId}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
+      // Persist to backend
+      try {
+        const res = await fetch(`${API}/auth/favorites/${strId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-          if (!res.ok) {
-            throw new Error(`Server returned ${res.status}`);
-          }
-
-          const data = await res.json();
-          if (Array.isArray(data.favorites)) {
-            setFavorites(data.favorites);
-          }
-        } catch (err) {
-          console.error("Failed to sync favorite with server, reverting:", err);
-          // Rollback on server failure
-          setFavorites((prev) => {
-            if (currentlyLiked) {
-              return prev.includes(strId) ? prev : [...prev, strId];
-            } else {
-              return prev.filter((id) => id !== strId);
-            }
-          });
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status}`);
         }
-      }
 
-      setInFlight((prev) => {
-        const next = { ...prev };
-        delete next[strId];
-        return next;
-      });
+        const data = await res.json();
+        if (Array.isArray(data.favorites)) {
+          setFavorites(data.favorites.map(String));
+        }
+      } catch (err) {
+        console.error("Failed to sync favorite with server, reverting:", err);
+        // Rollback on server failure
+        setFavorites((prev) => {
+          if (currentlyLiked) {
+            return prev.includes(strId) ? prev : [...prev, strId];
+          } else {
+            return prev.filter((id) => id !== strId);
+          }
+        });
+      } finally {
+        setInFlight((prev) => {
+          const next = { ...prev };
+          delete next[strId];
+          return next;
+        });
+      }
     },
-    [favorites, token, inFlight]
+    [favorites, token, inFlight],
   );
 
   const contextValue = useMemo(
@@ -159,8 +211,9 @@ export function FavoritesProvider({ children }) {
       isFavorited,
       isProcessing,
       toggleFavorite,
+      clearFavorites,
     }),
-    [favorites, isFavorited, isProcessing, toggleFavorite]
+    [favorites, isFavorited, isProcessing, toggleFavorite, clearFavorites],
   );
 
   return (

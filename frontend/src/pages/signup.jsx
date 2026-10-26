@@ -11,7 +11,7 @@ import signupLifestyleImg from '../assets/signup-lifestyle.jpg';
 function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, register, logout, isLoading } = useAuth();
+  const { user, register, requestLogout, isLoading } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -104,7 +104,8 @@ function Signup() {
               type="button"
               className="btn light"
               style={{ flex: 1 }}
-              onClick={logout}
+              onClick={() => requestLogout('/signup')}
+              id="signup-page-logout-btn"
             >
               Log out
             </button>

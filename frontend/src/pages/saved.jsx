@@ -153,8 +153,15 @@ function Saved() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch populated saved items
+  // Fetch populated saved items for authenticated user only
   const fetchSavedItems = async () => {
+    if (!token) {
+      setSavedItems([]);
+      setLoading(false);
+      setError('');
+      return;
+    }
+
     if (!favorites || favorites.length === 0) {
       setSavedItems([]);
       setLoading(false);
@@ -166,30 +173,15 @@ function Saved() {
     setError('');
 
     try {
-      // 1. If authenticated, fetch populated favorites
-      if (token) {
-        const res = await fetch(`${API}/auth/favorites?populate=true`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const items = Array.isArray(data.items) ? data.items : [];
-          setSavedItems(items);
-          return;
-        }
-      }
-
-      // 2. Fallback: fetch all items and filter by favorites
-      const res = await fetch(`${API}/items`);
+      const res = await fetch(`${API}/auth/favorites?populate=true`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) {
         throw new Error(`Server returned ${res.status}`);
       }
       const data = await res.json();
-      const allItems = Array.isArray(data) ? data : data.items || [];
-      const filtered = allItems.filter((it) =>
-        favorites.includes((it._id || it.id || '').toString())
-      );
-      setSavedItems(filtered);
+      const items = Array.isArray(data.items) ? data.items : [];
+      setSavedItems(items);
     } catch (err) {
       console.error('Error loading saved items:', err);
       setError('Could not load your saved pieces. Please check your connection.');
@@ -200,7 +192,7 @@ function Saved() {
 
   useEffect(() => {
     fetchSavedItems();
-  }, [token]);
+  }, [token, favorites]);
 
   // Keep displayed items strictly in sync with favorites
   const displayedItems = useMemo(() => {
@@ -217,6 +209,58 @@ function Saved() {
       console.error('Failed to toggle favorite:', err);
     }
   };
+
+  // Prevent logged-out users from viewing private saved items
+  if (!token) {
+    return (
+      <main
+        className="page-container savedPage"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <div
+          className="card"
+          style={{
+            maxWidth: "440px",
+            width: "100%",
+            textAlign: "center",
+            padding: "44px 28px",
+          }}
+        >
+          <div className="logo" style={{ marginBottom: "16px" }}>
+            re<span>wear</span>.
+          </div>
+          <h1 style={{ fontSize: "26px", margin: "0 0 8px" }}>
+            Sign In to View Saved Pieces
+          </h1>
+          <p className="muted" style={{ margin: "12px 0 24px", fontSize: "14px", lineHeight: 1.5 }}>
+            Access your curated wishlist, keep track of pieces you love, and propose wardrobe swaps.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <Link
+              to="/login"
+              className="btn dark"
+              style={{ textAlign: "center", padding: "12px 20px" }}
+              id="saved-login-redirect-btn"
+            >
+              Log in
+            </Link>
+            <Link
+              to="/signup"
+              className="btn light"
+              style={{ textAlign: "center", padding: "12px 20px" }}
+            >
+              Create an account
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="page-container savedPage">

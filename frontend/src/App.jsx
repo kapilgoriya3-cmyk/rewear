@@ -14,35 +14,43 @@ import Chat from './pages/chat';
 import Admin from './pages/admin';
 import Navbar from './components/navbar';
 import Footer from './components/Footer';
+import LogoutModal from './components/LogoutModal';
 import { AuthProvider } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { ToastProvider } from './context/ToastContext';
+import { ConfirmProvider } from './context/ConfirmContext';
 
 function App() {
   return (
     <AuthProvider>
       <FavoritesProvider>
-        <BrowserRouter>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/saved" element={<Saved />} />
-            <Route path="/wishlist" element={<Saved />} />
-            <Route path="/additem" element={<AddItem />} />
-            <Route path="/browse" element={<Browse />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/itemdetail/:id" element={<ItemDetail />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/chat/:id" element={<Chat />} />
-            <Route path="/negotiation" element={<Chat />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/notfound" element={<NotFound />} />
-          </Routes>
-          <Footer />
-        </BrowserRouter>
+        <ToastProvider>
+          <ConfirmProvider>
+            <BrowserRouter>
+              <Navbar />
+              <LogoutModal />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/saved" element={<Saved />} />
+                <Route path="/wishlist" element={<Saved />} />
+                <Route path="/additem" element={<AddItem />} />
+                <Route path="/browse" element={<Browse />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/itemdetail/:id" element={<ItemDetail />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/chat/:id" element={<Chat />} />
+                <Route path="/negotiation" element={<Chat />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/notfound" element={<NotFound />} />
+              </Routes>
+              <Footer />
+            </BrowserRouter>
+          </ConfirmProvider>
+        </ToastProvider>
       </FavoritesProvider>
     </AuthProvider>
   );

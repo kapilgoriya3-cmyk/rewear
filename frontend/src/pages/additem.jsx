@@ -20,7 +20,8 @@ function AddItem() {
     location: user?.location || "Ahmedabad, Gujarat",
     originalPrice: "3500",
     color: "Blue",
-    description: "Classic denim jacket in excellent condition with minimal wear. Looking to swap for a warm winter coat or knitwear.",
+    description:
+      "Classic denim jacket in excellent condition with minimal wear. Looking to swap for a warm winter coat or knitwear.",
   });
 
   const [swapValue, setSwapValue] = useState(1200);
@@ -58,9 +59,7 @@ function AddItem() {
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
 
     const validImages = selectedFiles.filter(
-      (file) =>
-        validTypes.includes(file.type) &&
-        file.size <= 5 * 1024 * 1024
+      (file) => validTypes.includes(file.type) && file.size <= 5 * 1024 * 1024,
     );
 
     if (validImages.length !== selectedFiles.length) {
@@ -103,16 +102,14 @@ function AddItem() {
   };
 
   const handleRemoveImage = (indexToRemove) => {
-    setImages((prev) =>
-      prev.filter((_, index) => index !== indexToRemove)
-    );
+    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
 
     setPreviewUrls((prev) => {
       const removed = prev[indexToRemove];
       if (removed) {
         URL.revokeObjectURL(removed.url);
         previewUrlsRef.current = previewUrlsRef.current.filter(
-          (url) => url !== removed.url
+          (url) => url !== removed.url,
         );
       }
       return prev.filter((_, index) => index !== indexToRemove);
@@ -168,43 +165,38 @@ function AddItem() {
               Authorization: `Bearer ${token}`,
             },
             body: imageFormData,
-          }
+          },
         );
 
         const uploadData = await uploadResponse.json();
 
         if (!uploadResponse.ok) {
-          throw new Error(
-            uploadData.message || "An image failed to upload."
-          );
+          throw new Error(uploadData.message || "An image failed to upload.");
         }
 
         uploadedUrls.push(uploadData.imageUrl);
       }
 
       // Create listing containing every uploaded image URL
-      const response = await fetch(
-      `${API_BASE_URL}/items`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            title: formData.name,
-            brand: formData.brand,
-            description: formData.description,
-            category: formData.category,
-            size: formData.size,
-            condition: formData.condition,
-            location: formData.location,
-            estimatedValue: swapValue,
-            image: uploadedUrls[0] || "",
-            images: uploadedUrls,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/items`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.name,
+          brand: formData.brand,
+          description: formData.description,
+          category: formData.category,
+          size: formData.size,
+          condition: formData.condition,
+          location: formData.location,
+          estimatedValue: swapValue,
+          image: uploadedUrls[0] || "",
+          images: uploadedUrls,
+        }),
+      });
 
       const data = await response.json();
 
@@ -225,16 +217,23 @@ function AddItem() {
   return (
     <main className="page-container">
       <div style={{ marginBottom: "20px" }}>
-        <Link to="/browse" className="muted" style={{ fontSize: "13px", fontWeight: 650 }}>
+        <Link
+          to="/browse"
+          className="muted"
+          style={{ fontSize: "13px", fontWeight: 650 }}
+        >
           ← Back to Explore
         </Link>
       </div>
 
       <div className="form">
         <div className="eyebrow">CREATE A LISTING</div>
-        <h1 style={{ fontSize: "36px", marginBottom: "8px" }}>Give your piece a new life.</h1>
+        <h1 style={{ fontSize: "36px", marginBottom: "8px" }}>
+          Give your piece a new life.
+        </h1>
         <p className="muted" style={{ maxWidth: "600px" }}>
-          Share genuine photos and accurate details so community members can propose honest, fair value swaps.
+          Share genuine photos and accurate details so community members can
+          propose honest, fair value swaps.
         </p>
 
         {/* Polished Drag & Drop Photo Area */}
@@ -257,7 +256,13 @@ function AddItem() {
             onChange={handleImageChange}
           />
 
-          <div style={{ fontSize: "32px", color: "var(--sage)", marginBottom: "6px" }}>
+          <div
+            style={{
+              fontSize: "32px",
+              color: "var(--sage)",
+              marginBottom: "6px",
+            }}
+          >
             📸
           </div>
 
@@ -265,12 +270,16 @@ function AddItem() {
             Drag and drop clothing photos here
           </h3>
 
-          <p className="muted" style={{ fontSize: "12.5px", margin: "0 0 4px" }}>
+          <p
+            className="muted"
+            style={{ fontSize: "12.5px", margin: "0 0 4px" }}
+          >
             Add front, back, label, and texture close-ups · JPG / PNG / WebP
           </p>
 
           <p className="muted" style={{ fontSize: "12px", margin: 0 }}>
-            <strong>{images.length} of 5</strong> photos selected · Up to 5 MB per photo
+            <strong>{images.length} of 5</strong> photos selected · Up to 5 MB
+            per photo
           </p>
 
           <button
@@ -280,7 +289,9 @@ function AddItem() {
             onClick={() => fileInputRef.current?.click()}
             disabled={images.length >= 5}
           >
-            {images.length >= 5 ? "Photo Limit Reached (5/5)" : "Choose photos from device"}
+            {images.length >= 5
+              ? "Photo Limit Reached (5/5)"
+              : "Choose photos from device"}
           </button>
 
           {/* Image Previews */}
@@ -454,7 +465,9 @@ function AddItem() {
             </div>
 
             <div className="field full">
-              <label htmlFor="item-description">DESCRIPTION & SWAP PREFERENCES</label>
+              <label htmlFor="item-description">
+                DESCRIPTION & SWAP PREFERENCES
+              </label>
               <textarea
                 id="item-description"
                 name="description"
@@ -470,7 +483,15 @@ function AddItem() {
           {/* Prominent Estimated Swap Value Box */}
           <div className="valueBox">
             <div>
-              <div style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--sage)" }}>
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  color: "var(--sage)",
+                }}
+              >
                 Suggested Swap Value
               </div>
 
@@ -479,7 +500,9 @@ function AddItem() {
               </div>
 
               <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                Calculated based on original price and {formData.condition.toLowerCase()} condition. Zero money changes hands.
+                Calculated based on original price and{" "}
+                {formData.condition.toLowerCase()} condition. Zero money changes
+                hands.
               </div>
             </div>
 

@@ -6,6 +6,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import { useConfirm } from "../context/ConfirmContext";
 import "./chat.css";
 import API_BASE_URL from "../api";
 
@@ -17,6 +19,8 @@ export default function Chat() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user, token } = useAuth();
+  const toast = useToast();
+  const confirm = useConfirm();
   const messagesEndRef = useRef(null);
 
   // Component State (All hooks declared at top level)
@@ -83,22 +87,25 @@ export default function Chat() {
 
         const currentUserId = user?.id || user?._id;
 
-        const realMessages = messagesData.messages.map((msg) => ({
-          id: msg._id,
-          sender: msg.sender?._id === currentUserId ? "me" : "them",
-          senderName: msg.sender?.name || "User",
-          avatar:
-            msg.sender?._id === currentUserId
+        const realMessages = messagesData.messages.map((msg) => {
+          const senderId = msg.sender?._id || msg.sender;
+          const isMe = String(senderId) === String(currentUserId);
+          return {
+            id: msg._id,
+            sender: isMe ? "me" : "them",
+            senderName: isMe ? "You" : msg.sender?.name || "User",
+            avatar: isMe
               ? undefined
               : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
                   msg.sender?.name || "User",
                 )}`,
-          text: msg.text,
-          timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        }));
+            text: msg.text,
+            timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+        });
 
         setMessages(realMessages);
       } catch (err) {
@@ -142,13 +149,14 @@ const handleSendMessage = async (e) => {
 
   const currentUserId = user?.id || user?._id;
 
+  const requesterId = swapRequest?.requester?._id || swapRequest?.requester;
   const receiverId =
-    swapRequest?.requester?._id === currentUserId
-      ? swapRequest?.receiver?._id
-      : swapRequest?.requester?._id;
+    String(requesterId) === String(currentUserId)
+      ? swapRequest?.receiver?._id || swapRequest?.receiver
+      : swapRequest?.requester?._id || swapRequest?.requester;
 
   if (!receiverId) {
-    alert("Receiver not found");
+    toast.error("Receiver not found");
     return;
   }
 
@@ -169,7 +177,7 @@ const handleSendMessage = async (e) => {
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data.message || "Failed to send message");
+      toast.error(data.message || "Failed to send message");
       return;
     }
 
@@ -193,7 +201,7 @@ const handleSendMessage = async (e) => {
     setInputText("");
   } catch (error) {
     console.error(error);
-    alert("Something went wrong while sending the message");
+    toast.error("Something went wrong while sending the message");
   }
 };
   // Quick Negotiation Suggestions
@@ -209,11 +217,19 @@ const handleSendMessage = async (e) => {
   };
 
   // Handle Swap Acceptance
-const handleAcceptSwap = async () => {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/swaps/${id}`,
-      {
+  const handleAcceptSwap = async () => {
+    const shouldAccept = await confirm({
+      title: "Accept Swap Proposal?",
+      message:
+        "Are you ready to accept this clothing swap? You can coordinate the meetup and handover details in chat.",
+      confirmText: "Accept Swap",
+      cancelText: "Cancel",
+      type: "success",
+    });
+    if (!shouldAccept) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/swaps/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -222,41 +238,49 @@ const handleAcceptSwap = async () => {
         body: JSON.stringify({
           status: "accepted",
         }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed to accept swap");
+        return;
       }
-    );
 
-    const data = await response.json();
+      setSwapStatus("accepted");
+      toast.success(data.message || "Swap accepted successfully!");
 
-    if (!response.ok) {
-      alert(data.message || "Failed to accept swap");
-      return;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `sys-${Date.now()}`,
+          type: "system",
+          text: "🎉 Swap Accepted! Both swappers confirmed the exchange.",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
     }
+  };
 
-    setSwapStatus("accepted");
+  const handleRejectSwap = async () => {
+    const shouldReject = await confirm({
+      title: "Decline Swap Proposal?",
+      message:
+        "Are you sure you want to decline this swap proposal? This negotiation will be closed.",
+      confirmText: "Decline Swap",
+      cancelText: "Keep Proposal",
+      isDestructive: true,
+    });
+    if (!shouldReject) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `sys-${Date.now()}`,
-        type: "system",
-        text: "🎉 Swap Accepted! Both swappers confirmed the exchange.",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong");
-  }
-};
-
-const handleRejectSwap = async () => {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/swaps/${id}`,
-      {
+    try {
+      const response = await fetch(`${API_BASE_URL}/swaps/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -265,42 +289,53 @@ const handleRejectSwap = async () => {
         body: JSON.stringify({
           status: "rejected",
         }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed to reject swap");
+        return;
       }
-    );
 
-    const data = await response.json();
+      setSwapStatus("rejected");
+      setSwapRequest((prev) => ({ ...prev, status: "rejected" }));
+      toast.info(data.message || "Swap request was declined.");
 
-    if (!response.ok) {
-      alert(data.message || "Failed to reject swap");
-      return;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `sys-${Date.now()}`,
+          type: "system",
+          text: "Swap request was rejected.",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
     }
-
-    setSwapStatus("rejected");
-    setSwapRequest((prev) => ({ ...prev, status: "rejected" }));
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `sys-${Date.now()}`,
-        type: "system",
-        text: "Swap request was rejected.",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong");
-  }
-};
+  };
 
   const [confirming, setConfirming] = useState(false);
   const [showChecklistModal, setShowChecklistModal] = useState(false);
 
   const handleConfirmExchange = async () => {
     if (confirming) return;
+
+    const shouldConfirm = await confirm({
+      title: "Confirm Physical Handover?",
+      message:
+        "Have you received your item and completed the exchange with your swap partner? Both participants must confirm to finalize the swap.",
+      confirmText: "Confirm Handover",
+      cancelText: "Not yet",
+      type: "info",
+    });
+    if (!shouldConfirm) return;
+
     setConfirming(true);
     try {
       const response = await fetch(`${API_BASE_URL}/swaps/${id}/confirm`, {
@@ -313,11 +348,11 @@ const handleRejectSwap = async () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Failed to confirm exchange");
+        toast.error(data.message || "Failed to confirm exchange");
         return;
       }
 
-      alert(data.message);
+      toast.success(data.message);
       if (data.swapRequest) {
         setSwapRequest(data.swapRequest);
         setSwapStatus(data.swapRequest.status);
@@ -352,7 +387,7 @@ const handleRejectSwap = async () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setConfirming(false);
     }
@@ -361,8 +396,7 @@ const handleRejectSwap = async () => {
   // Build the swapData object dynamically from the real swapRequest
   const currentUserId = user?.id || user?._id;
   const isRequester = swapRequest
-    ? swapRequest.requester?._id === currentUserId ||
-      swapRequest.requester === currentUserId
+    ? String(swapRequest.requester?._id || swapRequest.requester) === String(currentUserId)
     : false;
 
   const userConfirmed = isRequester
@@ -410,9 +444,13 @@ const handleRejectSwap = async () => {
               : `Size ${theirItemObj.size}`
             : "Size M",
           condition: theirItemObj?.condition || "Good",
-          estimatedValue: "₹1,200",
+          estimatedValue: theirItemObj?.estimatedValue
+            ? `₹${Number(theirItemObj.estimatedValue).toLocaleString('en-IN')}`
+            : theirItemObj?.price
+            ? `₹${Number(theirItemObj.price).toLocaleString('en-IN')}`
+            : "Fair Swap",
           ownerName: partnerName,
-          image: theirItemObj?.image || denimJacketImg,
+          image: (Array.isArray(theirItemObj?.images) && theirItemObj.images[0]) || theirItemObj?.image || denimJacketImg,
         },
         myItem: {
           id: myItemObj?._id,
@@ -424,9 +462,13 @@ const handleRejectSwap = async () => {
               : `Size ${myItemObj.size}`
             : "Size L",
           condition: myItemObj?.condition || "Good",
-          estimatedValue: "₹1,400",
+          estimatedValue: myItemObj?.estimatedValue
+            ? `₹${Number(myItemObj.estimatedValue).toLocaleString('en-IN')}`
+            : myItemObj?.price
+            ? `₹${Number(myItemObj.price).toLocaleString('en-IN')}`
+            : "Fair Swap",
           ownerName: "You",
-          image: myItemObj?.image || woolCoatImg,
+          image: (Array.isArray(myItemObj?.images) && myItemObj.images[0]) || myItemObj?.image || woolCoatImg,
         },
         user: {
           name: partnerName,
@@ -580,35 +622,44 @@ const handleRejectSwap = async () => {
           {/* Summary Footer with Dynamic Actions Based on Status */}
           <div className="swapSummaryFooter">
             {swapStatus === "pending" ? (
-              <>
-                <div className="swapStatusNotice">
+              isRequester ? (
+                <div className="swapStatusNotice" style={{ width: "100%" }}>
                   <span className="swapStatusNoticeIcon">⏳</span>
                   <span>
-                    Negotiate terms, verify garment condition, and accept when
-                    ready.
+                    Swap proposal sent! Waiting for <strong>{partnerName}</strong> to review and accept. You can chat below to coordinate meetup details.
                   </span>
                 </div>
+              ) : (
+                <>
+                  <div className="swapStatusNotice">
+                    <span className="swapStatusNoticeIcon">⏳</span>
+                    <span>
+                      Negotiate terms, verify garment condition, and accept when
+                      ready.
+                    </span>
+                  </div>
 
-                {/* Appropriate Action Buttons for Pending State */}
-                <div className="swapActionButtons">
-                  <button
-                    type="button"
-                    className="btnReject"
-                    onClick={handleRejectSwap}
-                    title="Decline this swap request"
-                  >
-                    Reject Swap
-                  </button>
-                  <button
-                    type="button"
-                    className="btnAccept"
-                    onClick={handleAcceptSwap}
-                    title="Accept this swap request"
-                  >
-                    Accept Swap
-                  </button>
-                </div>
-              </>
+                  {/* Action Buttons for Receiver */}
+                  <div className="swapActionButtons">
+                    <button
+                      type="button"
+                      className="btnReject"
+                      onClick={handleRejectSwap}
+                      title="Decline this swap request"
+                    >
+                      Reject Swap
+                    </button>
+                    <button
+                      type="button"
+                      className="btnAccept"
+                      onClick={handleAcceptSwap}
+                      title="Accept this swap request"
+                    >
+                      Accept Swap
+                    </button>
+                  </div>
+                </>
+              )
             ) : swapStatus === "accepted" ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
                 <div className="swapPostStatusBanner accepted">
@@ -795,11 +846,39 @@ const handleRejectSwap = async () => {
               <button
                 type="button"
                 className="chatHeaderBtn"
-                onClick={() =>
-                  alert(
-                    "ReWear Safe Swap Tips:\n- Meet in public places (e.g. Metro stations, cafes)\n- Inspect garment seams and zippers\n- Avoid cash transactions",
-                  )
-                }
+                onClick={async () => {
+                  await confirm({
+                    title: "🛡️ Safe Swap Tips",
+                    message: (
+                      <ul
+                        style={{
+                          textAlign: "left",
+                          margin: "12px 0 0",
+                          paddingLeft: "20px",
+                          lineHeight: "1.8",
+                          fontSize: "13.5px",
+                          color: "var(--ink-secondary)",
+                        }}
+                      >
+                        <li>
+                          <strong>Meet in public places:</strong> Metro stations, busy cafes, or university campuses.
+                        </li>
+                        <li>
+                          <strong>Inspect in daylight:</strong> Check fabric, seams, zippers, and care tags.
+                        </li>
+                        <li>
+                          <strong>Cashless barter:</strong> ReWear is a community wardrobe exchange; avoid monetary transactions.
+                        </li>
+                        <li>
+                          <strong>Two-way confirmation:</strong> Confirm the handover on ReWear only after physically exchanging pieces.
+                        </li>
+                      </ul>
+                    ),
+                    confirmText: "Got it",
+                    cancelText: "Close",
+                    type: "info",
+                  });
+                }}
                 title="Swap safety advice"
               >
                 Safe Swap Tips
@@ -949,8 +1028,8 @@ const handleRejectSwap = async () => {
               className="composerActionBtn"
               title="Attach garment photo or measurement note"
               onClick={() => {
-                alert(
-                  "Attachment selected: You can upload photos of garments, tags, or measurements.",
+                toast.info(
+                  "Photo attachments: You can upload photos of garments, tags, or measurements.",
                 );
               }}
             >

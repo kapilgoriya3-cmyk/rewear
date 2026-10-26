@@ -8,6 +8,8 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
+import { useToast } from "../context/ToastContext";
+import { useConfirm } from "../context/ConfirmContext";
 import API_BASE_URL from "../api";
 import denimJacketImg from "../assets/denimJacket.jpg";
 import floralDressImg from "../assets/floralDress.jpg";
@@ -52,6 +54,8 @@ function ItemDetail() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
   const { isFavorited, toggleFavorite, isProcessing } = useFavorites();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,6 +75,7 @@ function ItemDetail() {
   const [swapLoading, setSwapLoading] = useState(false);
   const [swapSent, setSwapSent] = useState(false);
   const [loadingMyItems, setLoadingMyItems] = useState(false);
+  const [existingSwapId, setExistingSwapId] = useState(null);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -95,6 +100,36 @@ function ItemDetail() {
 
     fetchItem();
   }, [id]);
+
+  useEffect(() => {
+    if (!token || !id) return;
+    let isMounted = true;
+    const checkExistingSwap = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/swaps/outgoing`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok || !isMounted) return;
+        const data = await response.json();
+        const activeSwap = (data.requests || []).find(
+          (req) =>
+            (req.requestedItem?._id || req.requestedItem) === id &&
+            req.status !== "rejected"
+        );
+        if (activeSwap && isMounted) {
+          setExistingSwapId(activeSwap._id);
+        }
+      } catch (err) {
+        console.error("Error checking existing swap:", err);
+      }
+    };
+    checkExistingSwap();
+    return () => {
+      isMounted = false;
+    };
+  }, [id, token]);
 
   const galleryImages = getValidGalleryImages(item);
   const safeIndex =
@@ -162,7 +197,7 @@ function ItemDetail() {
 
   const handleOpenSwapModal = async () => {
     if (!token) {
-      alert("Please log in to request a swap.");
+      toast.warning("Please log in to request a swap.");
       navigate("/login");
       return;
     }
@@ -170,7 +205,7 @@ function ItemDetail() {
     const currentUserId = user?.id || user?._id;
     const itemOwnerId = item?.owner?._id || item?.owner;
     if (currentUserId && itemOwnerId && String(currentUserId) === String(itemOwnerId)) {
-      alert("This is your own listing. You cannot swap with yourself.");
+      toast.warning("This is your own listing. You cannot swap with yourself.");
       return;
     }
 
@@ -184,7 +219,7 @@ function ItemDetail() {
 
       const data = await response.json();
       if (!response.ok) {
-        alert(data.message || "Failed to load your wardrobe items.");
+        toast.error(data.message || "Failed to load your wardrobe items.");
         return;
       }
 
@@ -193,11 +228,15 @@ function ItemDetail() {
       );
 
       if (availableItems.length === 0) {
-        if (
-          window.confirm(
-            "You have no available items in your wardrobe to offer for this swap.\n\nWould you like to list an item now?"
-          )
-        ) {
+        const goToAdd = await confirm({
+          title: "No Available Items",
+          message:
+            "You have no available items in your wardrobe to offer for this swap. Would you like to list an item now?",
+          confirmText: "List an Item",
+          cancelText: "Maybe later",
+          type: "info",
+        });
+        if (goToAdd) {
           navigate("/additem");
         }
         return;
@@ -208,7 +247,7 @@ function ItemDetail() {
       setShowSwapModal(true);
     } catch (err) {
       console.error(err);
-      alert("Could not load your wardrobe items. Please try again.");
+      toast.error("Could not load your wardrobe items. Please try again.");
     } finally {
       setLoadingMyItems(false);
     }
@@ -217,7 +256,7 @@ function ItemDetail() {
   const handleConfirmSwap = async (e) => {
     e.preventDefault();
     if (!selectedOfferedId) {
-      alert("Please select an item from your wardrobe to offer.");
+      toast.warning("Please select an item from your wardrobe to offer.");
       return;
     }
 
@@ -238,16 +277,35 @@ function ItemDetail() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Failed to send swap request");
+        toast.error(data.message || "Failed to send swap request");
         return;
       }
 
       setSwapSent(true);
       setShowSwapModal(false);
-      alert("Swap request sent successfully! You can track this swap in your Profile.");
+      const newSwapId = data.swapRequest?._id;
+      if (newSwapId) {
+        setExistingSwapId(newSwapId);
+        const goToChat = await confirm({
+          title: "Swap request sent!",
+          message:
+            "Your proposal has been sent successfully. Would you like to open the chat to negotiate the exchange?",
+          confirmText: "Open Negotiation Chat",
+          cancelText: "Maybe later",
+          type: "success",
+        });
+        if (goToChat) {
+          navigate(`/chat/${newSwapId}`);
+          return;
+        }
+      } else {
+        toast.success(
+          "Swap request sent successfully! You can track this swap in your Profile."
+        );
+      }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong while sending swap request.");
+      toast.error("Something went wrong while sending swap request.");
     } finally {
       setSwapLoading(false);
     }
@@ -520,23 +578,28 @@ function ItemDetail() {
               type="button"
               onClick={() => {
                 if (!token) {
-                  alert("Please log in to message the owner.");
+                  toast.warning("Please log in to message the owner.");
                   navigate("/login");
                   return;
                 }
                 const currentUserId = user?.id || user?._id;
                 const itemOwnerId = item?.owner?._id || item?.owner;
                 if (currentUserId && itemOwnerId && String(currentUserId) === String(itemOwnerId)) {
-                  alert("This is your own listing.");
+                  toast.warning("This is your own listing.");
                   return;
                 }
-                alert("To message the owner and negotiate an exchange, please propose a swap first.");
+                if (existingSwapId) {
+                  navigate(`/chat/${existingSwapId}`);
+                  return;
+                }
+                toast.info("To message the owner and negotiate an exchange, please propose a swap first.");
                 handleOpenSwapModal();
               }}
               className="btn light"
               style={{ flex: 1 }}
+              title={existingSwapId ? "Open conversation with owner" : "Propose a swap to message the owner"}
             >
-              💬 Message Owner
+              💬 {existingSwapId ? "Open Negotiation Chat" : "Message Owner"}
             </button>
             <button
               type="button"

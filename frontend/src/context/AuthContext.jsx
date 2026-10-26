@@ -227,11 +227,40 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [logoutRedirectUrl, setLogoutRedirectUrl] = useState("/login");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const requestLogout = (redirectTo = "/login") => {
+    setLogoutRedirectUrl(redirectTo);
+    setIsLogoutModalOpen(true);
+  };
+
+  const cancelLogout = () => {
+    if (isLoggingOut) return;
+    setIsLogoutModalOpen(false);
+  };
+
+  const confirmLogout = (navigateFn) => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      logout();
+      setIsLogoutModalOpen(false);
+      if (typeof navigateFn === "function") {
+        navigateFn(logoutRedirectUrl || "/login");
+      }
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("rewear_user");
     localStorage.removeItem("rewear_token");
+    localStorage.removeItem("rewear_favorites");
   };
 
   return (
@@ -244,6 +273,11 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
+        requestLogout,
+        cancelLogout,
+        confirmLogout,
+        isLogoutModalOpen,
+        isLoggingOut,
         refreshUser,
         updateProfile,
       }}

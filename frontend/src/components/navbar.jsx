@@ -10,7 +10,7 @@ import NotificationBell from './NotificationBell';
 function Navbar() {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { user, logout } = useAuth();
+  const { user, requestLogout } = useAuth();
   const { favoritesCount } = useFavorites();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -131,9 +131,10 @@ function Navbar() {
 
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={() => requestLogout('/login')}
                   className="btn btn-outline-sm hide"
                   title="Log out of your account"
+                  id="navbar-desktop-logout-btn"
                 >
                   Log out
                 </button>
@@ -221,10 +222,11 @@ function Navbar() {
                   type="button"
                   onClick={() => {
                     closeMobileMenu();
-                    logout();
+                    requestLogout('/login');
                   }}
                   className="btn btn-outline-sm"
                   style={{ width: '100%', marginTop: '10px' }}
+                  id="navbar-mobile-logout-btn"
                 >
                   Log out
                 </button>

@@ -66,6 +66,8 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
@@ -78,12 +80,16 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 button, input, select, textarea {
@@ -736,9 +742,12 @@ p {
 }
 
 .photo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform 0.4s var(--ease);
 }
 
@@ -1008,6 +1017,13 @@ p {
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 28px;
+}
+
+.browseLocationFilter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
 }
 
 .searchbar {
@@ -1587,7 +1603,7 @@ p {
 
 .profileStats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-top: 22px;
 }
@@ -1611,6 +1627,29 @@ p {
 .miniStat span {
   font-size: 12px;
   color: var(--muted);
+}
+
+.profileHeading {
+  font-size: 32px;
+}
+
+.profileItemRow {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profileItemDetails {
+  flex: 1;
+  min-width: 220px;
+}
+
+.profileItemActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .panel {
@@ -2341,14 +2380,25 @@ p {
 }
 
 @media (max-width: 900px) {
+  .top {
+    height: 64px;
+  }
+  .topContainer {
+    padding: 0 18px;
+    gap: 16px;
+  }
+  .logo {
+    font-size: 22px;
+  }
   .nav, .topRight .hide {
-    display: none;
+    display: none !important;
   }
   .mobileMenuToggle {
     display: flex;
   }
   .mobileDropdown {
     display: block;
+    top: 64px;
   }
   .cards {
     grid-template-columns: repeat(2, 1fr);
@@ -2365,19 +2415,24 @@ p {
   }
   .statsBand {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 16px;
   }
   .stat:nth-child(2)::after {
-    display: none;
+    display: none !important;
   }
   .detail {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
   .detailPanel {
     position: static;
   }
   .profile {
     grid-template-columns: 1fr;
+  }
+  .profileStats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
   .admin {
     grid-template-columns: 1fr;
@@ -2386,6 +2441,11 @@ p {
     display: flex;
     overflow-x: auto;
     gap: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .side::-webkit-scrollbar {
+    display: none;
   }
   .side button {
     min-width: max-content;
@@ -2395,7 +2455,7 @@ p {
     min-height: 0;
   }
   .authSplitHero {
-    min-height: 280px;
+    min-height: 240px;
   }
   .authSplitHeroOverlay {
     padding: 24px;
@@ -2405,37 +2465,427 @@ p {
   }
 }
 
+@media (max-width: 768px) {
+  .footerMain {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .footerBottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    padding-top: 22px;
+  }
+  .footerBottomRight {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px 18px;
+    width: 100%;
+  }
+  .footerBottomRight a {
+    font-size: 13px;
+    padding: 6px 4px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .footerBottomLeft {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .footerBottomLeft .footerDot {
+    display: none;
+  }
+  .footerMinimalContent {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  .footerMinimalLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 18px;
+  }
+}
+
 @media (max-width: 580px) {
-  h1 { font-size: 34px; }
-  .heroCopy h1 { font-size: 38px; }
-  .cards {
-    grid-template-columns: 1fr;
+  .page, .page-container {
+    padding: 18px 14px 60px;
   }
-  .photo {
-    aspect-ratio: 4 / 3.8;
+  h1 {
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
   }
-  .galleryMain {
-    height: 380px;
+  .heroCopy h1 {
+    font-size: 28px;
+    letter-spacing: -0.8px;
+    line-height: 1.15;
   }
-  .galleryThumbBtn {
-    width: 68px;
-    height: 68px;
+  h2 {
+    font-size: 20px;
+    letter-spacing: -0.3px;
   }
+  h3 {
+    font-size: 16px;
+  }
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+
+  /* Compact Phone Header */
+  .top {
+    height: 60px;
+  }
+  .topContainer {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .logo {
+    font-size: 20px;
+    letter-spacing: -0.8px;
+  }
+  .topRight {
+    gap: 6px;
+  }
+  .circle {
+    width: 36px;
+    height: 36px;
+  }
+  .circle svg {
+    width: 15px;
+    height: 15px;
+  }
+  .userProfileBadge .mini {
+    width: 32px;
+    height: 32px;
+  }
+  .mobileMenuToggle {
+    width: 36px;
+    height: 36px;
+  }
+  .mobileMenuToggle svg {
+    width: 19px;
+    height: 19px;
+  }
+  .mobileDropdown {
+    top: 60px;
+    padding: 16px 16px 24px;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .mobileNavLinks a {
+    font-size: 15px;
+    padding: 10px 0;
+  }
+
+  /* Centered Safe Notification Dropdown */
+  .notif-dropdown {
+    position: fixed;
+    top: 66px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    max-height: calc(85vh - 66px);
+  }
+
+  /* Hero Section */
+  .hero {
+    gap: 24px;
+    padding: 14px 0 28px;
+  }
+  .heroVisual {
+    min-height: 240px;
+    max-height: 280px;
+  }
+  .heroCard {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    max-width: none;
+    padding: 12px 14px;
+  }
+  .heroCard img {
+    width: 48px;
+    height: 48px;
+  }
+  .floating {
+    right: 10px;
+    top: 10px;
+    font-size: 11px;
+    padding: 5px 11px;
+  }
+  .heroActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .heroActions .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Balanced 2x2 Stats Band */
   .statsBand {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 16px 12px;
+  }
+  .stat {
+    padding: 10px 8px;
+  }
+  .stat b {
+    font-size: 22px;
+  }
+  .stat span {
+    font-size: 11px;
   }
   .stat::after {
     display: none !important;
   }
+
+  /* Discover / Editorial / How */
+  .editorialBox {
+    padding: 22px 16px;
+  }
+  .how {
+    gap: 12px;
+  }
+  .box {
+    padding: 18px 14px;
+  }
+
+  /* Explore / Browse Page */
+  .exploreTop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .exploreTop .btn {
+    align-self: flex-start;
+  }
+  .searchbar {
+    margin-bottom: 14px;
+  }
+  .searchbar input {
+    font-size: 13.5px;
+    padding: 11px 14px;
+  }
+  .browseLocationFilter {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    margin-bottom: 18px !important;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+  .chip {
+    flex-shrink: 0;
+    padding: 6px 13px;
+    font-size: 12px;
+  }
+
+  /* Clothing Cards 2-Column Responsive Fashion Grid */
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+  .photo {
+    aspect-ratio: 3 / 3.8;
+  }
+  .info {
+    padding: 9px 10px 11px;
+    gap: 3px;
+  }
+  .cardTitle {
+    font-size: 13px;
+  }
+  .cardSwapValue {
+    font-size: 12.5px;
+  }
+  .meta {
+    font-size: 11px;
+  }
+  .cardLocation {
+    font-size: 10.5px;
+    margin-top: 2px;
+  }
+  .cardFloatingBadge {
+    left: 7px;
+    top: 7px;
+  }
+  .cardPillSwap, .cardPillStatus {
+    font-size: 9px;
+    padding: 2.5px 6px;
+  }
+  .heart {
+    width: 28px;
+    height: 28px;
+    right: 7px;
+    top: 7px;
+  }
+  .heart svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* Profile Page */
+  .profileHeading {
+    font-size: 22px;
+    letter-spacing: -0.4px;
+  }
+  .profileTop {
+    padding: 18px 14px;
+  }
+  .profileSide {
+    padding: 20px 14px;
+  }
+  .profileSide img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+  }
+  .panel {
+    padding: 18px 14px;
+  }
+  .profileStats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .profileStats .miniStat {
+    padding: 12px 8px;
+  }
+  .miniStat b {
+    font-size: 20px;
+  }
+  .miniStat span {
+    font-size: 11px;
+  }
+  .profileItemRow {
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .profileItemRow img {
+    width: 75px !important;
+    height: 75px !important;
+  }
+  .profileItemDetails {
+    min-width: 140px;
+  }
+  .profileItemActions {
+    width: 100%;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .profileItemActions .btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    padding: 8px 10px !important;
+    font-size: 11.5px !important;
+  }
+
+  /* Item Detail Page */
+  .galleryMain {
+    height: 300px;
+    border-radius: var(--r-lg);
+  }
+  .galleryThumbs {
+    padding: 4px 0 8px;
+    gap: 8px;
+  }
+  .galleryThumbBtn {
+    width: 56px;
+    height: 56px;
+  }
+  .detailPanel {
+    padding: 18px 14px;
+    border-radius: var(--r-lg);
+  }
+  .bigPrice {
+    font-size: 28px;
+  }
+  .valueBox {
+    padding: 14px;
+    margin: 16px 0;
+  }
+
+  /* Form & Add Item */
+  .form {
+    padding: 20px 14px;
+    border-radius: var(--r-lg);
+  }
+  .upload {
+    padding: 22px 12px;
+    margin: 16px 0;
+  }
   .formGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 16px;
   }
-  .footerMain {
+  .formFoot {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .formFoot .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* How It Works & Community */
+  .howInfo {
+    padding: 20px 14px;
+  }
+  .flowStep {
+    padding: 18px 14px;
+    min-height: 0;
+  }
+  .flowStep .stepCircle {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Extra-narrow phones (< 340px, e.g. iPhone 5 / SE 1st gen) */
+@media (max-width: 339px) {
+  .cards {
     grid-template-columns: 1fr;
   }
-  .footerBottom {
-    flex-direction: column;
-    text-align: center;
+  .photo {
+    aspect-ratio: 4 / 3.2;
+    max-height: 220px;
+  }
+  .statsBand {
+    grid-template-columns: 1fr;
+  }
+  .profileStats {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2526,9 +2976,15 @@ p {
 
 @media (max-width: 520px) {
   .savedPiecesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 339px) {
+  .savedPiecesGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
-    max-width: 360px;
+    max-width: 300px;
     margin: 0 auto;
   }
 }

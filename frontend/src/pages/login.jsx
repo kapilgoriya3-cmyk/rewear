@@ -11,7 +11,7 @@ import authWardrobeImg from '../assets/auth-wardrobe.jpg';
 function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, login, logout, isLoading } = useAuth();
+  const { user, login, requestLogout, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -110,7 +110,8 @@ function Login() {
               type="button"
               className="btn light"
               style={{ flex: 1 }}
-              onClick={logout}
+              onClick={() => requestLogout('/login')}
+              id="login-page-logout-btn"
             >
               Log out
             </button>

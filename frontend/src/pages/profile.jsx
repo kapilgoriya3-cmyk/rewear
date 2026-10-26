@@ -29,7 +29,7 @@ function getImageForCategory(category, title) {
 }
 
 function Profile() {
-  const { user, logout, token, updateProfile } = useAuth();
+  const { user, token, updateProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +43,6 @@ function Profile() {
   const [myListings, setMyListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsError, setListingsError] = useState("");
-
 
   // Edit listing state
   const [editingItem, setEditingItem] = useState(null);
@@ -531,33 +530,6 @@ function Profile() {
               </button>
             ))}
           </div>
-
-          {/* Naturally integrated logout */}
-          <div
-            style={{
-              borderTop: "1px solid var(--line)",
-              paddingTop: "18px",
-              marginTop: "20px",
-            }}
-          >
-            <button
-              type="button"
-              className="btn light"
-              style={{
-                width: "100%",
-                borderColor: "var(--rose-border)",
-                color: "var(--rose)",
-                fontSize: "12.5px",
-              }}
-              onClick={() => {
-                logout();
-                navigate("/login");
-              }}
-              title="Log out of your ReWear account"
-            >
-              Sign out
-            </button>
-          </div>
         </aside>
 
         {/* Main Dashboard Content */}
@@ -565,7 +537,7 @@ function Profile() {
           {/* Stats Banner Header */}
           <div className="profileTop">
             <span className="eyebrow">YOUR DASHBOARD</span>
-            <h1 style={{ fontSize: "32px", margin: "6px 0 10px" }}>
+            <h1 className="profileHeading" style={{ margin: "6px 0 10px" }}>
               Welcome back, {user.name.split(" ")[0]}!
             </h1>
             <p className="muted" style={{ maxWidth: "600px", margin: 0 }}>
@@ -987,14 +959,7 @@ function Profile() {
                           </div>
                         ) : (
                           /* Visual Listing Card */
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "18px",
-                              alignItems: "center",
-                              flexWrap: "wrap",
-                            }}
-                          >
+                          <div className="profileItemRow">
                             {/* Item Photo */}
                             <img
                               src={itemImg}
@@ -1018,7 +983,7 @@ function Profile() {
                             />
 
                             {/* Item Details */}
-                            <div style={{ flex: 1, minWidth: "220px" }}>
+                            <div className="profileItemDetails">
                               <div
                                 style={{
                                   display: "flex",
@@ -1088,14 +1053,7 @@ function Profile() {
                             </div>
 
                             {/* Card Actions */}
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "8px",
-                                flexShrink: 0,
-                                flexWrap: "wrap",
-                              }}
-                            >
+                            <div className="profileItemActions">
                               <Link
                                 to={`/itemdetail/${item._id}`}
                                 className="btn light"
@@ -1140,7 +1098,6 @@ function Profile() {
               )}
             </div>
           )}
-
 
           {/* TAB 2: INCOMING REQUESTS */}
           {activeTab === "incoming" && (

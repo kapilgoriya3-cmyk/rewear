@@ -729,6 +729,10 @@
   border-bottom-right-radius: 4px;
 }
 
+.msgBubble.outgoing p {
+  color: #ffffff;
+}
+
 /* Message Attachment Preview */
 .msgAttachmentCard {
   margin-top: 10px;
