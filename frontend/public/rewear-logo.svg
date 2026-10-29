@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rewear-purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="45%" stop-color="#6D28D9" />
+      <stop offset="100%" stop-color="#4C1D95" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Squircle with modern curvature -->
+  <rect width="512" height="512" rx="116" fill="url(#rewear-purple-grad)" />
+
+  <g id="rewear-emblem">
+    <!-- TOP-RIGHT SWAP ARROW -->
+    <path 
+      d="M 110 207 A 155 155 0 0 1 406 220" 
+      fill="none" 
+      stroke="#FFFFFF" 
+      stroke-width="26" 
+      stroke-linecap="round" 
+    />
+    <!-- Mathematically aligned arrowhead at top-right -->
+    <polygon 
+      points="415,255 376,217 430,203" 
+      fill="#FFFFFF" 
+    />
+
+    <!-- BOTTOM-LEFT SWAP ARROW (180° rotational symmetry) -->
+    <path 
+      d="M 402 313 A 155 155 0 0 1 106 300" 
+      fill="none" 
+      stroke="#FFFFFF" 
+      stroke-width="26" 
+      stroke-linecap="round" 
+    />
+    <!-- Mathematically aligned arrowhead at bottom-left -->
+    <polygon 
+      points="97,265 136,303 82,317" 
+      fill="#FFFFFF" 
+    />
+
+    <!-- CLOTHES HANGER -->
+    <!-- Geometric circular hook -->
+    <path 
+      d="M 256 195 L 256 170 A 24 24 0 1 1 304 160" 
+      fill="none" 
+      stroke="#FFFFFF" 
+      stroke-width="26" 
+      stroke-linecap="round" 
+    />
+
+    <!-- Hanger Frame (Shoulders & Crossbar) -->
+    <path 
+      d="M 256 195 L 148 270 C 136 278 142 298 158 298 L 354 298 C 370 298 376 278 364 270 Z" 
+      fill="none" 
+      stroke="#FFFFFF" 
+      stroke-width="26" 
+      stroke-linecap="round" 
+      stroke-linejoin="round" 
+    />
+  </g>
+</svg>
