@@ -1364,6 +1364,80 @@ p {
   margin-bottom: 6px;
 }
 
+/* Google Authentication & Auth Divider */
+.google-auth-container {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.google-auth-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+}
+
+.google-auth-wrapper > div {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.google-auth-wrapper iframe {
+  margin: 0 auto !important;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--line);
+}
+
+.auth-divider span {
+  padding: 0 12px;
+  text-transform: uppercase;
+}
+
+.btn-google-fallback {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-google-fallback:hover {
+  background: var(--paper);
+  border-color: var(--muted);
+}
+
+.btn-google-fallback svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 /* Fallback for regular auth container */
 .auth {
   max-width: 440px;

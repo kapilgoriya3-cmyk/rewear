@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 
 const registerUser = async (req, res) => {
   try {
@@ -76,6 +77,13 @@ const registerUser = async (req, res) => {
       location: location?.trim() || "Earth",
     });
 
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not configured on the server");
+      return res.status(500).json({
+        message: "Server configuration error",
+      });
+    }
+
     // 10. Create JWT
     const token = jwt.sign(
       { userId: user._id },
@@ -93,6 +101,7 @@ const registerUser = async (req, res) => {
         email: user.email,
         location: user.location,
         role: user.role,
+        avatar: user.avatar || "",
       },
     });
 
@@ -125,12 +134,27 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Guard against Google-created accounts that do not have a password set
+    if (!user.password) {
+      return res.status(400).json({
+        message:
+          "This account was created using Google Sign-In. Please sign in with Google.",
+      });
+    }
+
     // Check password
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({
         message: "Invalid email or password",
+      });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not configured on the server");
+      return res.status(500).json({
+        message: "Server configuration error",
       });
     }
 
@@ -150,6 +174,7 @@ const loginUser = async (req, res) => {
         email: user.email,
         location: user.location,
         role: user.role,
+        avatar: user.avatar || "",
       },
     });
   } catch (error) {
@@ -157,6 +182,158 @@ const loginUser = async (req, res) => {
 
     res.status(500).json({
       message: "Server error",
+    });
+  }
+};
+
+const googleAuth = async (req, res) => {
+  try {
+    const credential = req.body.credential || req.body.idToken || req.body.token;
+
+    if (!credential || typeof credential !== "string") {
+      return res.status(400).json({
+        message: "Google credential token is required",
+      });
+    }
+
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      console.error("GOOGLE_CLIENT_ID is not configured in backend environment variables");
+      return res.status(500).json({
+        message: "Google authentication is not configured on the server",
+      });
+    }
+
+    // Verify token with Google public keys and audience
+    let ticket;
+    try {
+      const client = new OAuth2Client(googleClientId);
+      ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: googleClientId,
+      });
+    } catch (verifyError) {
+      console.error("Google token verification failed:", verifyError.message);
+      return res.status(401).json({
+        message: "Invalid or expired Google credential",
+      });
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      return res.status(401).json({
+        message: "Invalid Google credential payload",
+      });
+    }
+
+    const { sub, email, email_verified, name, picture } = payload;
+
+    if (!sub || !email_verified || !email) {
+      return res.status(400).json({
+        message: "Google account identity or email is not verified or unavailable",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 1. Search by Google Subject ID (sub) first
+    let user = await User.findOne({ googleId: sub });
+
+    if (user) {
+      // User found via Google ID - sync avatar if missing
+      let hasUpdates = false;
+      if (!user.avatar && picture) {
+        user.avatar = picture;
+        hasUpdates = true;
+      }
+      if (hasUpdates) {
+        await user.save();
+      }
+    } else {
+      // 2. Check for existing account with matching email
+      const existingUser = await User.findOne({ email: normalizedEmail });
+
+      if (existingUser) {
+        // Automatic account linking by email is UNSAFE because existing local
+        // accounts do not require verified email addresses at registration.
+        // Allowing automatic linking would enable account pre-hijacking.
+        // Require explicit proof of ownership (account password) before linking.
+        if (req.body?.password && existingUser.password) {
+          const passwordMatch = await bcrypt.compare(
+            req.body.password,
+            existingUser.password
+          );
+          if (!passwordMatch) {
+            return res.status(401).json({
+              message:
+                "Invalid password for existing account. Unable to link Google account.",
+            });
+          }
+
+          // Ownership verified: link Google account while preserving existing password, role, favorites, and profile data
+          existingUser.googleId = sub;
+          if (!existingUser.avatar && picture) {
+            existingUser.avatar = picture;
+          }
+          await existingUser.save();
+          user = existingUser;
+        } else {
+          // Reject automatic linking to preserve existing account integrity
+          return res.status(409).json({
+            message:
+              "An account with this email already exists. Please sign in with your email and password.",
+          });
+        }
+      } else {
+        // 3. New user registration via Google
+        user = await User.create({
+          name: name?.trim() || "ReWear Member",
+          email: normalizedEmail,
+          googleId: sub,
+          authProvider: "google",
+          avatar: picture || "",
+          location: "Earth",
+          role: "user", // Strictly default role 'user', never admin
+        });
+      }
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error("JWT_SECRET is not configured on the server");
+      return res.status(500).json({
+        message: "Authentication service configuration error",
+      });
+    }
+
+    // Create standard ReWear JWT
+    const token = jwt.sign(
+      { userId: user._id },
+      jwtSecret,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({
+      message: "Google authentication successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        location: user.location,
+        role: user.role,
+        avatar: user.avatar || "",
+      },
+    });
+  } catch (error) {
+    console.error("googleAuth error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "An account with these Google credentials already exists",
+      });
+    }
+    return res.status(500).json({
+      message: "Server error during Google authentication",
     });
   }
 };
@@ -178,6 +355,7 @@ const getMe = async (req, res) => {
         email: user.email,
         location: user.location,
         role: user.role,
+        avatar: user.avatar || "",
       },
     });
   } catch (error) {
@@ -219,6 +397,7 @@ const updateProfile = async (req, res) => {
         email: user.email,
         location: user.location,
         role: user.role,
+        avatar: user.avatar || "",
       },
     });
   } catch (error) {
@@ -297,6 +476,7 @@ const toggleFavorite = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  googleAuth,
   getMe,
   updateProfile,
   getFavorites,

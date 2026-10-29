@@ -263,6 +263,46 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("rewear_favorites");
   };
 
+  const loginWithGoogle = async (credential) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${AUTH_API}/google`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.message || "Google authentication failed. Please try again.",
+        };
+      }
+
+      setUser(data.user);
+      setToken(data.token);
+
+      return {
+        success: true,
+        user: data.user,
+        message: data.message,
+      };
+    } catch (err) {
+      console.error("Google authentication network error:", err);
+      return {
+        success: false,
+        error: "Unable to reach backend server. Please verify the server is running.",
+        networkError: true,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -272,6 +312,7 @@ export function AuthProvider({ children }) {
         isLoading,
         login,
         register,
+        loginWithGoogle,
         logout,
         requestLogout,
         cancelLogout,
